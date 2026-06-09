@@ -3,6 +3,9 @@ const {
   subtraction,
   multiplication,
   division,
+  modulo,
+  power,
+  squareRoot,
   calculate,
   runCli
 } = require("../calculator");
@@ -67,6 +70,36 @@ describe("calculator operation functions", () => {
       expect(() => division(8, 0)).toThrow("Division by zero is not allowed.");
     });
   });
+
+  describe("modulo", () => {
+    test("returns the remainder for positive integers", () => {
+      expect(modulo(10, 3)).toBe(1);
+    });
+
+    test("throws for modulo by zero", () => {
+      expect(() => modulo(8, 0)).toThrow("Modulo by zero is not allowed.");
+    });
+  });
+
+  describe("power", () => {
+    test("raises base to exponent", () => {
+      expect(power(2, 3)).toBe(8);
+    });
+
+    test("supports zero exponent", () => {
+      expect(power(5, 0)).toBe(1);
+    });
+  });
+
+  describe("squareRoot", () => {
+    test("returns the square root of a positive number", () => {
+      expect(squareRoot(9)).toBe(3);
+    });
+
+    test("throws for negative numbers", () => {
+      expect(() => squareRoot(-1)).toThrow("Square root of a negative number is not allowed.");
+    });
+  });
 });
 
 describe("calculate", () => {
@@ -82,8 +115,15 @@ describe("calculate", () => {
     expect(calculate(6, "X", 3)).toBe(18);
   });
 
+  test("supports modulo, power, and square root", () => {
+    expect(calculate(10, "%", 3)).toBe(1);
+    expect(calculate(2, "^", 4)).toBe(16);
+    expect(calculate(2, "**", 4)).toBe(16);
+    expect(calculate(9, "sqrt")).toBe(3);
+  });
+
   test("throws for unsupported operators", () => {
-    expect(() => calculate(6, "%", 3)).toThrow("Unsupported operator: %");
+    expect(() => calculate(6, "&", 3)).toThrow("Unsupported operator: &");
   });
 });
 
@@ -108,6 +148,7 @@ describe("runCli", () => {
       "Usage: node src/calculator.js <number1> <operator> <number2>"
     );
     expect(logSpy).toHaveBeenNthCalledWith(2, "Example: node src/calculator.js 8 + 4");
+    expect(logSpy).toHaveBeenNthCalledWith(3, "Square root: node src/calculator.js 9 sqrt");
   });
 
   test("returns failure for invalid numbers", () => {
@@ -122,5 +163,19 @@ describe("runCli", () => {
 
     expect(runCli(["8", "/", "0"])).toBe(1);
     expect(errorSpy).toHaveBeenCalledWith("Division by zero is not allowed.");
+  });
+
+  test("returns success for square root operation", () => {
+    const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
+
+    expect(runCli(["9", "sqrt"])).toBe(0);
+    expect(logSpy).toHaveBeenCalledWith(3);
+  });
+
+  test("returns failure for square root of a negative number", () => {
+    const errorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(runCli(["-9", "sqrt"])).toBe(1);
+    expect(errorSpy).toHaveBeenCalledWith("Square root of a negative number is not allowed.");
   });
 });
